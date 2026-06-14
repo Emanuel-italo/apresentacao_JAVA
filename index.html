@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>OrbitLink — API REST · Java Advanced · Global Solution 2026/1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --void:#070b10;
+  --void-2:#0a121a;
+  --panel:rgba(16,28,38,.62);
+  --panel-solid:#0e1822;
+  --line:rgba(122,162,182,.16);
+  --line-strong:rgba(122,162,182,.32);
+
+  --signal:#58c7e0;
+  --signal-deep:#2a7e95;
+  --harvest:#e8a85c;
+  --harvest-deep:#b9763a;
+
+  --ink:#eaf3f6;
+  --ink-2:#a6bcc6;
+  --ink-3:#62798a;
+
+  --ok:#4fd99a;
+  --warn:#f2c14e;
+  --crit:#ff5e6c;
+
+  --display:'Space Grotesk',sans-serif;
+  --body:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --slide-dur:.85s;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--void);color:var(--ink);font-family:var(--body);
+  overflow:hidden;position:fixed;inset:0;-webkit-font-smoothing:antialiased;letter-spacing:.1px;
+}
+
+/* ============ BACKGROUND — ORBITAL SCENE ============ */
+.bg-glow{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 70% at 78% 4%, rgba(88,199,224,.10), transparent 55%),
+    radial-gradient(100% 100% at 50% 50%, transparent 38%, rgba(0,0,0,.55) 100%),
+    linear-gradient(180deg,#04070b 0%, var(--void-2) 52%, #050d14 100%);
+}
+.nebula{position:fixed;inset:-12%;z-index:0;pointer-events:none;will-change:transform;
+  background:
+    radial-gradient(38% 30% at 22% 30%, rgba(74,108,180,.14), transparent 60%),
+    radial-gradient(42% 34% at 82% 22%, rgba(40,120,140,.13), transparent 62%),
+    radial-gradient(50% 40% at 60% 80%, rgba(120,72,150,.10), transparent 60%);
+  filter:blur(8px);animation:neb 46s ease-in-out infinite alternate;opacity:.9}
+@keyframes neb{0%{transform:translate3d(-1.5%,-1%,0) scale(1.02)}100%{transform:translate3d(2%,1.5%,0) scale(1.06)}}
+
+#space{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+.orbit-ring{
+  position:fixed;left:50%;top:46%;z-index:0;pointer-events:none;
+  width:170vmax;height:170vmax;border-radius:50%;
+  border:1px solid rgba(88,199,224,.05);transform:translate(-50%,-50%);
+  animation:spin 260s linear infinite;
+}
+.orbit-ring::after{content:'';position:absolute;inset:13vmax;border-radius:50%;
+  border:1px solid rgba(232,168,92,.045)}
+.orbit-ring::before{content:'';position:absolute;inset:30vmax;border-radius:50%;
+  border:1px dashed rgba(88,199,224,.04)}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+.earth-wrap{position:fixed;left:0;right:0;bottom:0;height:46vh;z-index:0;pointer-events:none;will-change:transform}
+.earth-wrap svg{position:absolute;inset:0;width:100%;height:100%}
+.aurora{position:fixed;left:-10%;right:-10%;bottom:14vh;height:30vh;z-index:0;pointer-events:none;
+  display:flex;justify-content:center;gap:1.5vw;filter:blur(14px);opacity:.5;mix-blend-mode:screen;will-change:transform}
+.aurora i{flex:1;max-width:120px;height:100%;transform-origin:bottom center;
+  background:linear-gradient(180deg,transparent 0%, rgba(79,217,154,.0) 8%, rgba(79,217,154,.55) 70%, rgba(88,199,224,.5) 100%);
+  border-radius:50% 50% 0 0/100% 100% 0 0;animation:curtain 9s ease-in-out infinite}
+.aurora i:nth-child(2){animation-duration:11s;animation-delay:-3s;background:linear-gradient(180deg,transparent,rgba(88,199,224,.5) 75%,rgba(79,217,154,.5))}
+.aurora i:nth-child(3){animation-duration:8s;animation-delay:-1.5s}
+.aurora i:nth-child(4){animation-duration:12s;animation-delay:-5s;background:linear-gradient(180deg,transparent,rgba(120,200,170,.5) 78%,rgba(79,217,154,.5))}
+.aurora i:nth-child(5){animation-duration:10s;animation-delay:-2.5s}
+@keyframes curtain{0%,100%{transform:scaleY(.78) translateX(-8px) skewX(-4deg);opacity:.35}
+  50%{transform:scaleY(1.08) translateX(10px) skewX(5deg);opacity:.7}}
+
+.grain{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:.04;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.hud-corner{position:fixed;width:26px;height:26px;z-index:7;pointer-events:none;opacity:.5}
+.hud-corner span{position:absolute;background:var(--signal);box-shadow:0 0 8px rgba(88,199,224,.5)}
+.hud-corner .h{height:1.5px;width:26px}.hud-corner .v{width:1.5px;height:26px}
+.hud-tl{top:14px;left:14px}.hud-tl .h{top:0;left:0}.hud-tl .v{top:0;left:0}
+.hud-tr{top:14px;right:14px}.hud-tr .h{top:0;right:0}.hud-tr .v{top:0;right:0}
+.hud-bl{bottom:14px;left:14px}.hud-bl .h{bottom:0;left:0}.hud-bl .v{bottom:0;left:0}
+.hud-br{bottom:14px;right:14px}.hud-br .h{bottom:0;right:0}.hud-br .v{bottom:0;right:0}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:8;height:54px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(20px,4vw,46px);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--ink-3)}
+.topbar .station{display:flex;align-items:center;gap:11px;color:var(--ink-2)}
+.beacon{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:beacon 2.4s ease-in-out infinite}
+@keyframes beacon{0%,100%{opacity:1}50%{opacity:.35}}
+.topbar .mid{display:flex;gap:22px;align-items:center}
+.topbar .mid .grp{display:flex;gap:8px;align-items:center}
+.topbar .lbl{color:var(--ink-3)}.topbar .val{color:var(--signal)}
+.topbar .val.live{color:var(--ok)}
+.sig-bars{display:inline-flex;gap:2px;align-items:flex-end;height:11px}
+.sig-bars i{width:3px;background:var(--signal);opacity:.3;border-radius:1px}
+.sig-bars i.on{opacity:1;box-shadow:0 0 6px rgba(88,199,224,.5)}
+.sig-bars i:nth-child(1){height:3px}.sig-bars i:nth-child(2){height:5px}
+.sig-bars i:nth-child(3){height:8px}.sig-bars i:nth-child(4){height:11px}
+
+.stage{position:fixed;inset:0;z-index:2;overflow:hidden}
+.track{display:flex;height:100%;will-change:transform;transition:transform var(--slide-dur) var(--ease)}
+.slide{position:relative;flex:0 0 100%;height:100%;display:flex;flex-direction:column;
+  justify-content:center;padding:74px clamp(24px,8vw,120px) 92px}
+.inner{width:100%;max-width:1180px;margin:0 auto}
+
+.sweep{position:fixed;inset:0;z-index:9;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(88,199,224,.10),transparent);transform:translateX(-100%)}
+.sweep.go{animation:sweep .7s var(--ease)}
+@keyframes sweep{0%{opacity:1;transform:translateX(-100%)}100%{opacity:0;transform:translateX(100%)}}
+
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--signal);display:inline-flex;align-items:center;gap:12px;margin-bottom:22px}
+.eyebrow::before{content:'';width:34px;height:1px;background:linear-gradient(90deg,var(--signal),transparent)}
+.eyebrow.warm{color:var(--harvest)}
+.eyebrow.warm::before{background:linear-gradient(90deg,var(--harvest),transparent)}
+.eyebrow.center{justify-content:center}
+
+h1.headline{font-family:var(--display);font-weight:700;line-height:.98;letter-spacing:-1.5px;
+  font-size:clamp(2.1rem,5.6vw,4.6rem);color:var(--ink)}
+h2.title{font-family:var(--display);font-weight:700;line-height:1.02;letter-spacing:-1px;
+  font-size:clamp(1.7rem,4.2vw,3.2rem);color:var(--ink);margin-bottom:18px}
+.title .accent{color:var(--signal)}
+.title .accent.warm{color:var(--harvest)}
+.lead{font-size:clamp(1rem,1.7vw,1.2rem);line-height:1.6;color:var(--ink-2);max-width:64ch;font-weight:300}
+.muted{color:var(--ink-3)}.mono{font-family:var(--mono)}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.slide.active .reveal{opacity:1;transform:none;transition-delay:calc(var(--i,0) * .08s + .16s)}
+
+.hero{align-items:center;text-align:center}
+.hero .inner{max-width:940px;display:flex;flex-direction:column;align-items:center}
+.hero-scene{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.hero-scene svg{position:absolute;width:100%;height:100%}
+.wordmark{position:relative;margin:6px 0 4px}
+.wordmark h1{font-family:var(--display);font-weight:700;letter-spacing:-2px;
+  font-size:clamp(2.8rem,9vw,6.2rem);line-height:.9;
+  background:linear-gradient(180deg,#fff 0%,var(--signal) 130%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 60px rgba(88,199,224,.18)}
+.hero .tag{font-family:var(--display);font-weight:500;font-size:clamp(1.05rem,2.6vw,1.6rem);
+  color:var(--ink);margin-top:14px;letter-spacing:.3px}
+.hero .sub{font-family:var(--mono);font-size:clamp(.7rem,1.6vw,.84rem);letter-spacing:2.2px;
+  color:var(--ink-3);text-transform:uppercase;margin-top:18px}
+.hero .sub b{color:var(--harvest);font-weight:500}
+.hero .course{margin-top:30px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;
+  color:var(--ink-3);border:1px solid var(--line);border-radius:100px;padding:9px 20px;
+  background:rgba(10,18,26,.5);backdrop-filter:blur(6px)}
+.ground-node{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--harvest);
+  box-shadow:0 0 0 0 rgba(232,168,92,.6);animation:nodepulse 2.6s ease-out infinite;margin-bottom:26px}
+@keyframes nodepulse{0%{box-shadow:0 0 0 0 rgba(232,168,92,.5)}
+  70%{box-shadow:0 0 0 18px rgba(232,168,92,0)}100%{box-shadow:0 0 0 0 rgba(232,168,92,0)}}
+
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;justify-content:center}
+.tag-chip{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--ink-2);
+  border:1px solid var(--line-strong);border-radius:100px;padding:7px 14px;background:rgba(10,18,26,.5);backdrop-filter:blur(6px)}
+.tag-chip b{color:var(--signal);font-weight:500}
+
+.stat-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:18px 22px;background:var(--panel);
+  backdrop-filter:blur(10px);min-width:150px;flex:1}
+.stat .n{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,3vw,2.1rem);line-height:1;color:var(--signal)}
+.stat .n.warm{color:var(--harvest)}
+.stat .l{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-3);margin-top:9px}
+
+.checklist{list-style:none;margin-top:26px;display:grid;gap:13px}
+.checklist li{display:flex;gap:16px;align-items:flex-start;font-size:1rem;color:var(--ink-2);line-height:1.5}
+.checklist li b{color:var(--ink);font-weight:600}
+.checklist .tick{flex:0 0 auto;width:22px;height:22px;border-radius:6px;margin-top:2px;
+  border:1px solid var(--signal);display:flex;align-items:center;justify-content:center;
+  color:var(--signal);font-family:var(--mono);font-size:11px;background:rgba(88,199,224,.06)}
+
+.grid{display:grid;gap:16px;margin-top:8px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+.card{position:relative;border:1px solid var(--line);border-radius:16px;padding:24px;background:var(--panel);
+  backdrop-filter:blur(12px);overflow:hidden;
+  transition:transform .4s var(--ease),border-color .4s var(--ease),box-shadow .4s var(--ease)}
+.card::before{content:'';position:absolute;inset:0;border-radius:16px;padding:1px;
+  background:linear-gradient(140deg,rgba(88,199,224,.4),transparent 40%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s;z-index:2}
+.card::after{content:'';position:absolute;width:280px;height:280px;border-radius:50%;
+  left:var(--gx,50%);top:var(--gy,50%);transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(circle,rgba(88,199,224,.16),transparent 65%);opacity:0;transition:opacity .35s;z-index:1}
+.card.warm::after{background:radial-gradient(circle,rgba(232,168,92,.16),transparent 65%)}
+.card:hover{transform:translateY(-6px);border-color:var(--line-strong);
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.7),0 0 30px -12px rgba(88,199,224,.25)}
+.card:hover::before{opacity:1}
+.card:hover::after{opacity:1}
+.card>*{position:relative;z-index:3}
+.card .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;border:1px solid var(--line-strong);background:rgba(88,199,224,.05)}
+.card.warm .ic{background:rgba(232,168,92,.06)}
+.card .ic svg{width:22px;height:22px}
+.card h3{font-family:var(--display);font-weight:600;font-size:1.16rem;margin-bottom:9px;color:var(--ink);letter-spacing:-.2px}
+.card p{font-size:.91rem;line-height:1.55;color:var(--ink-2);font-weight:300}
+.card p+p{margin-top:9px}
+.card .why{color:var(--ink-3);font-size:.84rem;border-top:1px dashed var(--line-strong);margin-top:13px;padding-top:11px}
+.card .why b{color:var(--signal);font-weight:500}
+.card.warm .why b{color:var(--harvest)}
+.card .pin{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--ink-3);
+  margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.card .pin span{border:1px solid var(--line);border-radius:5px;padding:2px 7px;background:rgba(0,0,0,.25)}
+
+/* layered architecture */
+.layer-stack{display:grid;gap:9px;margin-top:8px}
+.layer{display:flex;align-items:center;gap:16px;border:1px solid var(--line);border-radius:12px;
+  padding:14px 18px;background:var(--panel);backdrop-filter:blur(10px);
+  transition:border-color .3s,transform .3s}
+.layer:hover{border-color:var(--line-strong);transform:translateX(5px)}
+.layer .ltag{flex:0 0 auto;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;
+  color:var(--signal);width:108px}
+.layer.warm .ltag{color:var(--harvest)}
+.layer .ldesc{font-size:.92rem;color:var(--ink-2);line-height:1.45}
+.layer .ldesc b{color:var(--ink);font-weight:600}
+.layer .lar{margin-left:auto;color:var(--ink-3);font-family:var(--mono);font-size:9px;letter-spacing:1px;white-space:nowrap}
+.flow-mini{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 22px;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.flow-mini .pill{border:1px solid var(--line-strong);border-radius:7px;padding:6px 11px;background:rgba(0,0,0,.25);color:var(--ink-2)}
+.flow-mini .pill.b{color:var(--signal);border-color:var(--signal-deep)}
+.flow-mini .pill.w{color:var(--harvest);border-color:var(--harvest-deep)}
+.flow-mini .ar{color:var(--signal)}
+
+.flow-note{margin-top:22px}
+
+/* numbered steps (security flow) */
+.steps{display:grid;gap:11px;margin-top:8px}
+.step{display:flex;gap:16px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;
+  padding:14px 18px;background:var(--panel);backdrop-filter:blur(10px);transition:border-color .3s,transform .3s}
+.step:hover{border-color:var(--line-strong);transform:translateX(4px)}
+.step .num{flex:0 0 auto;width:30px;height:30px;border-radius:8px;border:1px solid var(--signal-deep);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;color:var(--signal);
+  background:rgba(88,199,224,.06)}
+.step .stxt{font-size:.94rem;color:var(--ink-2);line-height:1.5}
+.step .stxt b{color:var(--ink);font-weight:600}
+.step .stxt .mono{color:var(--signal)}
+
+/* console */
+.console{border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;background:#060a0e;font-family:var(--mono)}
+.console .bar{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,.02);font-size:11px;letter-spacing:1px;color:var(--ink-3)}
+.console .bar .led{width:9px;height:9px;border-radius:50%}
+.console .bar .led.r{background:#ff5f57}.console .bar .led.y{background:#febc2e}.console .bar .led.g{background:#28c840}
+.console .bar .stream{margin-left:auto;color:var(--ok);font-size:10px;display:flex;align-items:center;gap:6px}
+.console .bar .stream::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:beacon 1.4s infinite}
+.console pre{margin:0;padding:18px 20px;font-size:.8rem;line-height:1.7;overflow:auto;color:var(--ink-2);white-space:pre-wrap;word-break:break-word}
+.console .key{color:var(--signal)}.console .str{color:var(--harvest)}
+.console .num{color:var(--ok)}.console .bool{color:var(--crit)}
+.console .cmt{color:var(--ink-3)}
+
+/* api / endpoint rows + accordion */
+.rows{display:grid;gap:9px;margin-top:6px;max-height:62vh;overflow-y:auto;padding-right:8px}
+.rows::-webkit-scrollbar{width:4px}
+.rows::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:4px}
+.row{border:1px solid var(--line);border-radius:9px;background:rgba(0,0,0,.22);
+  transition:border-color .3s,background .3s,transform .3s;cursor:pointer;overflow:hidden}
+.row:hover{border-color:var(--line-strong);background:rgba(88,199,224,.04);transform:translateX(4px)}
+.row.open{background:rgba(88,199,224,.06);border-color:var(--signal)}
+.row-head{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.78rem;padding:12px 14px}
+.verb{flex:0 0 auto;font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:5px;font-weight:700;width:54px;text-align:center}
+.verb.get{color:var(--signal);background:rgba(88,199,224,.1);border:1px solid var(--signal-deep)}
+.verb.post{color:var(--ok);background:rgba(79,217,154,.1);border:1px solid #2e8b63}
+.verb.put{color:var(--harvest);background:rgba(232,168,92,.1);border:1px solid var(--harvest-deep)}
+.verb.del{color:var(--crit);background:rgba(255,94,108,.1);border:1px solid #a83b45}
+.row-head .rpath{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-head .rpath b{color:var(--ink)}
+.row-head .chev{margin-left:auto;color:var(--ink-3);transition:transform .3s;flex:0 0 auto}
+.row.open .row-head .chev{transform:rotate(90deg);color:var(--signal)}
+.row-desc{display:none;font-family:var(--body);font-size:.85rem;line-height:1.5;color:var(--ink-2);
+  padding:0 16px 14px 16px}
+.row.open .row-desc{display:block;animation:fadeIn .35s ease}
+.row-desc b{color:var(--ink)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* status code grid */
+.code-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-top:8px}
+.code-cell{border:1px solid var(--line);border-radius:11px;padding:15px 12px;background:var(--panel);backdrop-filter:blur(10px);text-align:center}
+.code-cell .c{font-family:var(--display);font-weight:700;font-size:1.5rem;line-height:1}
+.code-cell .c.g{color:var(--ok)}.code-cell .c.b{color:var(--signal)}.code-cell .c.y{color:var(--warn)}.code-cell .c.r{color:var(--crit)}
+.code-cell .d{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);margin-top:7px;letter-spacing:.5px;line-height:1.4}
+
+/* crew */
+.crew{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+.member{border:1px solid var(--line);border-radius:16px;padding:26px 22px;text-align:center;
+  background:var(--panel);backdrop-filter:blur(12px);transition:transform .4s var(--ease),border-color .4s}
+.member:hover{transform:translateY(-6px);border-color:var(--line-strong)}
+.member .av{width:58px;height:58px;border-radius:50%;margin:0 auto 16px;border:1px solid var(--signal-deep);
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 30% 25%,rgba(88,199,224,.18),transparent);color:var(--signal)}
+.member .av svg{width:26px;height:26px}
+.member h4{font-family:var(--display);font-weight:600;font-size:1.05rem;color:var(--ink);line-height:1.25}
+.member .rm{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--ink-3);margin-top:8px}
+.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;justify-content:center}
+.linkbtn{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;letter-spacing:1px;
+  color:var(--ink);text-decoration:none;border:1px solid var(--line-strong);border-radius:100px;padding:11px 20px;
+  background:rgba(10,18,26,.5);backdrop-filter:blur(6px);
+  transition:border-color .3s,color .3s,transform .3s,background .3s}
+.linkbtn:hover{border-color:var(--signal);color:var(--signal);transform:translateY(-2px);background:rgba(88,199,224,.07)}
+.linkbtn svg{width:16px;height:16px}
+.closing{margin-top:28px;font-family:var(--mono);font-size:12px;letter-spacing:2px;color:var(--ink-3);text-transform:uppercase}
+.closing b{color:var(--ok)}
+
+.botbar{position:fixed;bottom:0;left:0;right:0;z-index:8;height:62px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 clamp(20px,4vw,46px);font-family:var(--mono)}
+.slide-id{font-size:11px;letter-spacing:1.5px;color:var(--ink-3)}.slide-id b{color:var(--signal)}
+.dots{display:flex;gap:8px}
+.dot-nav{width:9px;height:9px;border-radius:50%;border:1px solid var(--line-strong);background:transparent;
+  cursor:pointer;padding:0;transition:all .35s var(--ease)}
+.dot-nav.on{background:var(--signal);border-color:var(--signal);box-shadow:0 0 10px rgba(88,199,224,.6);width:26px;border-radius:6px}
+.nav-btns{display:flex;gap:10px}
+.nbtn{width:42px;height:42px;border-radius:11px;border:1px solid var(--line-strong);background:rgba(10,18,26,.55);
+  backdrop-filter:blur(8px);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .3s var(--ease)}
+.nbtn:hover:not(:disabled){border-color:var(--signal);color:var(--signal);box-shadow:0 0 16px -4px rgba(88,199,224,.5)}
+.nbtn:disabled{opacity:.25;cursor:default}.nbtn svg{width:18px;height:18px}
+.progress{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--harvest),var(--signal));
+  z-index:9;width:0;box-shadow:0 0 12px rgba(88,199,224,.6);transition:width .6s var(--ease)}
+.hint{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);z-index:7;font-family:var(--mono);
+  font-size:10px;letter-spacing:2px;color:var(--ink-3);text-transform:uppercase;
+  animation:fade 3s ease-in-out infinite;pointer-events:none}
+@keyframes fade{0%,100%{opacity:.35}50%{opacity:.9}}
+
+/* =================== LAUNCH OVERLAY =================== */
+#launch{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-end;justify-content:center;
+  overflow:hidden;background:radial-gradient(130% 100% at 50% 118%, rgba(12,24,32,.35), rgba(4,7,11,.94) 66%);
+  transition:opacity 1s ease, visibility 1s}
+#launch.done{opacity:0;visibility:hidden;pointer-events:none}
+
+.lx-flash{position:absolute;inset:0;z-index:30;pointer-events:none;opacity:0;
+  background:radial-gradient(60% 40% at 50% 78%, rgba(255,225,170,.95), rgba(255,180,90,.4) 40%, transparent 70%)}
+.lx-flash.go{animation:flash 1.1s ease-out forwards}
+@keyframes flash{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
+
+.pad-scene{position:relative;z-index:10;width:min(560px,90vw);height:min(520px,68vh);
+  display:flex;align-items:flex-end;justify-content:center;margin-bottom:2vh}
+.pad-scene.shake{animation:rumble .12s linear infinite}
+@keyframes rumble{0%{transform:translate(0,0)}25%{transform:translate(-1.5px,1px)}
+  50%{transform:translate(1.5px,-1px)}75%{transform:translate(-1px,-1.5px)}100%{transform:translate(1px,1.5px)}}
+
+.gantry{position:absolute;right:14%;bottom:8%;width:46px;height:62%;z-index:2}
+.gantry svg{width:100%;height:100%}
+.gantry .lite{animation:beacon 1.6s ease-in-out infinite}
+.gantry .lite.b{animation-delay:.8s}
+
+.pad{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);width:62%;height:18px;z-index:1;
+  background:linear-gradient(180deg,#1a2733,#0c151d);border:1px solid var(--line-strong);border-radius:6px;
+  box-shadow:0 22px 40px -18px rgba(0,0,0,.8)}
+.pad::after{content:'';position:absolute;left:50%;bottom:100%;transform:translateX(-50%);
+  width:120%;height:90px;background:radial-gradient(closest-side,rgba(88,199,224,.10),transparent);pointer-events:none}
+
+.rocket{position:relative;z-index:5;width:120px;height:86%;margin-bottom:6%;transform-origin:50% 100%;will-change:transform}
+.rocket svg{width:100%;height:100%;overflow:visible}
+.rocket.launch{animation:liftoff 2.4s cubic-bezier(.55,.06,.7,.05) forwards}
+@keyframes liftoff{0%{transform:translateY(0) scale(1)}14%{transform:translateY(6px) scale(1.01)}100%{transform:translateY(-128vh) scale(.6)}}
+.rocket.idle{animation:hover-rk 3.4s ease-in-out infinite}
+@keyframes hover-rk{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+.flame{transform-origin:50% 0;transform:scaleY(0);opacity:0;transition:opacity .3s}
+.flame.on{opacity:1;animation:flick .09s steps(2) infinite}
+@keyframes flick{0%{transform:scaleY(1) scaleX(1)}100%{transform:scaleY(.86) scaleX(1.12)}}
+
+.smoke{position:absolute;bottom:4%;left:50%;transform:translateX(-50%);width:80%;height:120px;z-index:3;pointer-events:none}
+.smoke .puff{position:absolute;bottom:0;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,rgba(232,240,245,.9),rgba(150,170,185,.5) 55%,transparent 72%);opacity:0;transform:scale(.2)}
+.smoke.go .puff{animation:billow var(--d,2.4s) ease-out forwards}
+@keyframes billow{0%{opacity:0;transform:translate(0,0) scale(.2)}20%{opacity:.95}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-20px)) scale(2.4)}}
+.vent{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:60%;height:40px;z-index:3;pointer-events:none;opacity:.45}
+.vent i{position:absolute;bottom:0;width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,215,225,.6),transparent 70%);animation:steam 3.2s ease-in-out infinite}
+.vent i:nth-child(1){left:18%;animation-delay:0s}
+.vent i:nth-child(2){left:48%;animation-delay:1.1s}
+.vent i:nth-child(3){left:74%;animation-delay:2.1s}
+@keyframes steam{0%{opacity:0;transform:translateY(0) scale(.6)}30%{opacity:.6}100%{opacity:0;transform:translateY(-34px) scale(1.6)}}
+
+.lx-ui{position:absolute;top:9%;left:0;right:0;z-index:20;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 24px}
+.lx-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:3.5px;text-transform:uppercase;color:var(--signal);
+  display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.lx-eyebrow::before,.lx-eyebrow::after{content:'';width:24px;height:1px;background:var(--signal);opacity:.6}
+
+.boot{width:min(460px,86vw);border:1px solid var(--line-strong);border-radius:14px;overflow:hidden;
+  background:rgba(7,12,17,.78);backdrop-filter:blur(8px);box-shadow:0 24px 60px -24px rgba(0,0,0,.8)}
+.boot .head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--ink-3)}
+.boot .head .d{width:8px;height:8px;border-radius:50%;background:var(--signal-deep)}
+.boot .head .d.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.boot .head .pct{margin-left:auto;color:var(--signal)}
+.boot .log{font-family:var(--mono);font-size:11px;line-height:1.85;color:var(--ink-2);padding:14px 16px;text-align:left;min-height:118px}
+.boot .log .l{opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.boot .log .l.show{opacity:1;transform:none}
+.boot .log .ok{color:var(--ok)}.boot .log .pp{color:var(--signal)}.boot .log .dim{color:var(--ink-3)}
+.boot .track2{height:6px;background:rgba(255,255,255,.05);border-top:1px solid var(--line)}
+.boot .track2 i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--signal-deep),var(--signal));box-shadow:0 0 12px rgba(88,199,224,.6)}
+
+.ready{opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.ready.show{opacity:1;transform:none;pointer-events:auto}
+.ready h2{font-family:var(--display);font-weight:700;letter-spacing:-1px;line-height:1.02;
+  font-size:clamp(1.9rem,6vw,3.2rem);color:var(--ink)}
+.ready h2 b{background:linear-gradient(180deg,#fff,var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ready p{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-3);margin-top:14px}
+.launch-btn{margin-top:26px;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;
+  color:#04121a;background:linear-gradient(180deg,#9fe6f3,var(--signal));border:none;border-radius:100px;
+  padding:16px 34px;cursor:pointer;box-shadow:0 0 0 0 rgba(88,199,224,.5);position:relative;overflow:hidden;
+  transition:transform .25s var(--ease),box-shadow .3s;animation:btnpulse 2.4s ease-in-out infinite}
+.launch-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 12px 40px -10px rgba(88,199,224,.7)}
+.launch-btn:active{transform:translateY(0) scale(.99)}
+@keyframes btnpulse{0%,100%{box-shadow:0 0 0 0 rgba(88,199,224,.45)}70%{box-shadow:0 0 0 16px rgba(88,199,224,0)}}
+
+.count{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
+.count.show{opacity:1}
+.count .n{font-family:var(--display);font-weight:700;color:var(--ink);
+  font-size:clamp(7rem,32vw,20rem);line-height:1;letter-spacing:-4px;text-shadow:0 0 80px rgba(88,199,224,.5);position:relative}
+.count .n::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:1.6em;height:1.6em;border:2px solid var(--signal);border-radius:50%;opacity:.5}
+.count .n.go{animation:pop .92s var(--ease)}
+@keyframes pop{0%{opacity:0;transform:scale(.4);filter:blur(8px)}18%{opacity:1;transform:scale(1);filter:blur(0)}100%{opacity:0;transform:scale(1.5)}}
+.count .n.fire{color:var(--harvest);font-size:clamp(3.4rem,15vw,9rem);letter-spacing:2px;text-shadow:0 0 80px rgba(232,168,92,.7)}
+.count .n.fire::after{display:none}
+
+.lx-skip{position:absolute;bottom:22px;right:22px;z-index:26;font-family:var(--mono);font-size:11px;
+  letter-spacing:1.5px;color:var(--ink-3);background:none;border:1px solid var(--line);border-radius:100px;
+  padding:8px 16px;cursor:pointer;transition:color .3s,border-color .3s}
+.lx-skip:hover{color:var(--signal);border-color:var(--signal)}
+
+.stage.preboot .slide.active .reveal{opacity:0;transform:translateY(26px);transition:none}
+
+@media (max-width:880px){
+  .g4{grid-template-columns:1fr 1fr}.g2,.g3{grid-template-columns:1fr}.crew{grid-template-columns:1fr}
+  .slide{padding:72px 22px 90px}.topbar .mid{display:none}.hud-corner{display:none}.hint{display:none}
+  .gantry{display:none}.layer .lar{display:none}
+}
+@media (max-width:560px){.g4{grid-template-columns:1fr}.botbar{height:58px;padding:0 16px}.dots{gap:6px}.layer .ltag{width:auto}}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.18s !important}
+  .orbit-ring,.nebula,.aurora i{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="nebula" id="nebula"></div>
+<canvas id="space"></canvas>
+<div class="orbit-ring"></div>
+
+<div class="earth-wrap" id="earthWrap">
+  <svg viewBox="0 0 1440 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="earthBody" cx="50%" cy="120%" r="78%">
+        <stop offset="0%" stop-color="#103744"/><stop offset="38%" stop-color="#0a2230"/>
+        <stop offset="72%" stop-color="#08151f"/><stop offset="100%" stop-color="#060c12"/>
+      </radialGradient>
+      <radialGradient id="dayside" cx="74%" cy="120%" r="60%">
+        <stop offset="0%" stop-color="#2e93a8" stop-opacity=".55"/>
+        <stop offset="45%" stop-color="#1c5f72" stop-opacity=".25"/>
+        <stop offset="100%" stop-color="#0a2230" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="atmo" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#58c7e0" stop-opacity=".0"/>
+        <stop offset="35%" stop-color="#58c7e0" stop-opacity=".10"/>
+        <stop offset="62%" stop-color="#7fd7ec" stop-opacity=".22"/>
+        <stop offset="100%" stop-color="#bdeefb" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="soft"><feGaussianBlur stdDeviation="9"/></filter>
+      <filter id="softer"><feGaussianBlur stdDeviation="22"/></filter>
+      <clipPath id="globe"><circle cx="720" cy="1560" r="1380"/></clipPath>
+    </defs>
+    <path d="M-200 196 A 1380 1380 0 0 1 1640 196 L1640 600 L-200 600 Z" fill="url(#atmo)" filter="url(#softer)"/>
+    <path d="M-200 188 A 1380 1380 0 0 1 1640 188" fill="none" stroke="#bdeefb" stroke-opacity=".5" stroke-width="2" filter="url(#soft)"/>
+    <circle cx="720" cy="1560" r="1380" fill="url(#earthBody)"/>
+    <g clip-path="url(#globe)">
+      <circle cx="720" cy="1560" r="1380" fill="url(#dayside)"/>
+      <g fill="#0e2f33" opacity=".55" filter="url(#soft)">
+        <path d="M280 360 q120 -60 240 -20 q90 30 60 120 q-40 90 -180 70 q-160 -20 -120 -170z"/>
+        <path d="M820 300 q160 -40 300 30 q80 50 30 130 q-70 90 -240 50 q-150 -40 -90 -160z"/>
+        <path d="M560 480 q120 -20 180 60 q30 70 -70 90 q-130 20 -150 -70 q-15 -60 40 -80z"/>
+      </g>
+      <rect x="0" y="0" width="560" height="600" fill="#060c12" opacity=".5" filter="url(#softer)"/>
+      <g id="cityLights" fill="#f0b86a"></g>
+      <g id="clouds" fill="#dfeaf0" opacity=".22" filter="url(#soft)">
+        <g class="cloud">
+          <ellipse cx="300" cy="300" rx="160" ry="26"/><ellipse cx="760" cy="360" rx="200" ry="30"/><ellipse cx="1200" cy="320" rx="150" ry="24"/>
+        </g>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<div class="aurora" id="aurora"><i></i><i></i><i></i><i></i><i></i></div>
+<div class="grain"></div>
+<div class="sweep" id="sweep"></div>
+
+<div class="hud-corner hud-tl"><span class="h"></span><span class="v"></span></div>
+<div class="hud-corner hud-tr"><span class="h"></span><span class="v"></span></div>
+<div class="hud-corner hud-bl"><span class="h"></span><span class="v"></span></div>
+<div class="hud-corner hud-br"><span class="h"></span><span class="v"></span></div>
+
+<div class="topbar">
+  <div class="station"><span class="beacon"></span>ORBITLINK · SPACE ECONOMY API</div>
+  <div class="mid">
+    <div class="grp"><span class="lbl">SINAL</span>
+      <span class="sig-bars"><i class="on"></i><i class="on"></i><i class="on"></i><i id="sigLast"></i></span>
+    </div>
+    <div class="grp"><span class="lbl">LAT</span><span class="val live" id="liveLat">62ms</span></div>
+    <div class="grp"><span class="lbl">REQ</span><span class="val" id="reqCount">0000</span></div>
+    <div class="grp"><span class="lbl">UPTIME</span><span class="val" id="uptime">000s</span></div>
+  </div>
+  <div class="station"><span class="lbl">SPRING BOOT 3.4.5 · JWT</span></div>
+</div>
+
+<main class="stage preboot" id="stage">
+  <div class="track" id="track">
+
+    <!-- 0 · HERO -->
+    <section class="slide hero active">
+      <div class="hero-scene">
+        <svg viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#58c7e0" stop-opacity=".55"/><stop offset="100%" stop-color="#58c7e0" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <polygon points="940,150 600,600 600,600 930,160" fill="url(#beam)" opacity=".45"/>
+          <line x1="938" y1="155" x2="600" y2="600" stroke="#58c7e0" stroke-width="1.2" stroke-opacity=".5"/>
+          <g transform="translate(938,150)">
+            <rect x="-13" y="-9" width="26" height="18" rx="3" fill="#0e1822" stroke="#58c7e0" stroke-width="1.4"/>
+            <rect x="-40" y="-5" width="20" height="10" rx="1.5" fill="#0e1822" stroke="#2a7e95" stroke-width="1"/>
+            <rect x="20" y="-5" width="20" height="10" rx="1.5" fill="#0e1822" stroke="#2a7e95" stroke-width="1"/>
+            <circle r="46" fill="none" stroke="#58c7e0" stroke-opacity=".18" stroke-width="1"/>
+          </g>
+          <circle r="3.2" fill="#58c7e0">
+            <animateMotion dur="2.6s" repeatCount="indefinite" path="M938,155 L600,600"/>
+            <animate attributeName="opacity" values="0;1;1;0" dur="2.6s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="2.4" fill="#4fd99a">
+            <animateMotion dur="2.6s" begin="1.3s" repeatCount="indefinite" path="M938,155 L600,600"/>
+            <animate attributeName="opacity" values="0;1;1;0" dur="2.6s" begin="1.3s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+      <div class="inner">
+        <div class="eyebrow center reveal" style="--i:0">FIAP · 2TDS · Global Solution 2026/1 · Java Advanced</div>
+        <span class="ground-node reveal" style="--i:1"></span>
+        <div class="wordmark reveal" style="--i:1"><h1>OrbitLink</h1></div>
+        <p class="tag reveal" style="--i:2">API REST de Gestão da Economia Espacial</p>
+        <p class="sub reveal" style="--i:3">Ativos orbitais &nbsp;·&nbsp; Telemetria &nbsp;·&nbsp; Manutenção &nbsp;·&nbsp; <b>ODS 9 · 11 · 13</b></p>
+        <div class="tag-row reveal" style="--i:4">
+          <span class="tag-chip"><b>Java</b> 17</span>
+          <span class="tag-chip"><b>Spring Boot</b> 3.4.5</span>
+          <span class="tag-chip">Spring Data JPA</span>
+          <span class="tag-chip">Spring Security · JWT</span>
+          <span class="tag-chip">HATEOAS</span>
+          <span class="tag-chip">OpenAPI</span>
+          <span class="tag-chip">Docker · Render</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 · A SOLUÇÃO PROPOSTA -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow warm reveal" style="--i:0">Missão · 01 — A solução proposta para a GS</div>
+        <h2 class="title reveal" style="--i:1">Operar o que orbita, <span class="accent warm">do solo</span>.</h2>
+        <p class="lead reveal" style="--i:2">A nova corrida tecnológica é a economia espacial: satélites monitoram o clima, orientam o agronegócio, evitam desastres e conectam regiões remotas. O OrbitLink é a plataforma que dá suporte à operação desses ativos — uma API REST que conecta a exploração espacial a problemas reais da Terra.</p>
+        <ul class="checklist">
+          <li class="reveal" style="--i:3"><span class="tick">↳</span><span><b>Ciclo de vida dos ativos.</b> Cadastro de satélites, sondas, CubeSats, estações-base e módulos orbitais.</span></li>
+          <li class="reveal" style="--i:4"><span class="tick">↳</span><span><b>Telemetria.</b> Registro de clima, sinal e geolocalização recebidos de cada ativo.</span></li>
+          <li class="reveal" style="--i:5"><span class="tick">↳</span><span><b>Manutenção & alertas.</b> Histórico de intervenções com custo e geração de alertas (colisão, falha, degradação, clima).</span></li>
+          <li class="reveal" style="--i:6"><span class="tick">↳</span><span><b>Missões.</b> Vínculo entre ativos e missões via alocação N:N com chave composta.</span></li>
+        </ul>
+        <div class="stat-row">
+          <div class="stat reveal" style="--i:7"><div class="n warm">ODS 9</div><div class="l">Indústria, inovação & infraestrutura</div></div>
+          <div class="stat reveal" style="--i:8"><div class="n">ODS 11</div><div class="l">Cidades & comunidades sustentáveis</div></div>
+          <div class="stat reveal" style="--i:9"><div class="n">ODS 13</div><div class="l">Ação contra a mudança do clima</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · ARQUITETURA -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 02 — Arquitetura em camadas</div>
+        <h2 class="title reveal" style="--i:1">Responsabilidades <span class="accent">bem separadas</span>.</h2>
+        <div class="flow-mini reveal" style="--i:2">
+          <span class="pill">Cliente</span><span class="ar">→</span>
+          <span class="pill b">Controller</span><span class="ar">→</span>
+          <span class="pill b">Service</span><span class="ar">→</span>
+          <span class="pill b">Repository</span><span class="ar">→</span>
+          <span class="pill w">Banco H2</span>
+        </div>
+        <div class="layer-stack">
+          <div class="layer reveal" style="--i:3"><span class="ltag">controller</span><span class="ldesc"><b>Porta de entrada REST.</b> Recebe a requisição, valida e devolve apenas DTOs. Nunca expõe entidades.</span><span class="lar">@RestController</span></div>
+          <div class="layer reveal" style="--i:4"><span class="ltag">service</span><span class="ldesc"><b>Regra de negócio.</b> Orquestra o fluxo, controla transações e converte entidade ↔ DTO.</span><span class="lar">@Service · @Transactional</span></div>
+          <div class="layer reveal" style="--i:5"><span class="ltag">repository</span><span class="ldesc"><b>Acesso a dados.</b> Interfaces Spring Data JPA que falam com o banco.</span><span class="lar">JpaRepository</span></div>
+          <div class="layer reveal" style="--i:6"><span class="ltag">entity</span><span class="ldesc"><b>Modelo persistente.</b> Mapeamento JPA das tabelas do domínio.</span><span class="lar">@Entity</span></div>
+          <div class="layer warm reveal" style="--i:7"><span class="ltag">dto</span><span class="ldesc"><b>Contrato da API.</b> Objetos de entrada (Request) e saída (Response) como <span class="mono">Java Records</span> imutáveis.</span><span class="lar">record</span></div>
+        </div>
+        <p class="lead flow-note reveal" style="--i:8">O pacote ainda traz <span class="mono">enums</span> (tipos do domínio), <span class="mono">exception</span> (erros + handler global), <span class="mono">security</span> (JWT) e <span class="mono">config</span> (CORS e carga inicial). Separar camadas mantém o código testável e fácil de evoluir.</p>
+      </div>
+    </section>
+
+    <!-- 3 · SPRING -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 03 — A utilização do Spring</div>
+        <h2 class="title reveal" style="--i:1">O ecossistema, <span class="accent">peça por peça</span>.</h2>
+        <p class="lead reveal" style="--i:2" style="margin-bottom:4px">Toque em cada módulo para ver o que ele faz e por que entrou no projeto.</p>
+        <div class="rows reveal" style="--i:3" id="springRows">
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb post">CORE</span><span class="rpath"><b>Spring Boot</b> · autoconfiguração & servidor embarcado</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> sobe a aplicação com Tomcat embutido e configura tudo por convenção. <b>Por que usamos:</b> elimina XML e boilerplate — `mvn spring-boot:run` e a API está no ar.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb get">WEB</span><span class="rpath"><b>Spring Web</b> · controllers REST</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> mapeia rotas e verbos HTTP com `@RestController` e `ResponseEntity`. <b>Por que usamos:</b> é a base para expor os endpoints e devolver o `HttpStatus` correto.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb get">DATA</span><span class="rpath"><b>Spring Data JPA</b> · persistência</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> dá CRUD pronto via `JpaRepository` sobre Hibernate. <b>Por que usamos:</b> escrevemos a interface e o Spring implementa o acesso ao banco — consultas customizadas via JPQL.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb del">SEC</span><span class="rpath"><b>Spring Security + JWT</b> · autenticação</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> protege as rotas e valida tokens em cada requisição. <b>Por que usamos:</b> a API é stateless — sem sessão no servidor, autenticação por token assinado.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb put">HATEOAS</span><span class="rpath"><b>Spring HATEOAS</b> · links hipermídia</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> anexa links de navegação à resposta com `EntityModel`, `linkTo` e `methodOn`. <b>Por que usamos:</b> leva a API ao nível 3 de maturidade REST — o cliente descobre as próximas ações pela própria resposta.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb put">VALID</span><span class="rpath"><b>Spring Validation</b> · Bean Validation</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> valida o corpo da requisição com `@Valid` e anotações (`@NotBlank`, `@NotNull`, `@Size`). <b>Por que usamos:</b> rejeita dados inválidos antes da regra de negócio, devolvendo 400 padronizado.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb get">DOCS</span><span class="rpath"><b>springdoc OpenAPI</b> · Swagger UI</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> gera documentação interativa via `@OpenAPIDefinition`, `@Operation` e `@Tag`. <b>Por que usamos:</b> permite testar os endpoints pelo navegador, com botão Authorize para o token.</div>
+          </div>
+          <div class="row" onclick="this.classList.toggle('open')">
+            <div class="row-head"><span class="verb post">DEV</span><span class="rpath"><b>Lombok + DevTools</b> · produtividade</span><span class="chev">›</span></div>
+            <div class="row-desc"><b>O que faz:</b> Lombok gera getters/setters/construtores (`@Data`); DevTools dá hot-reload. <b>Por que usamos:</b> menos código repetitivo e ciclo de desenvolvimento mais rápido.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · MODELO DE DOMÍNIO -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 04 — Modelagem avançada</div>
+        <h2 class="title reveal" style="--i:1">O domínio, <span class="accent">em JPA</span>.</h2>
+        <div class="grid g2">
+          <div class="card reveal" style="--i:2">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><path d="M12 3v6M12 9l-6 4M12 9l6 4M6 13v5M18 13v5"/></svg></div>
+            <h3>Herança — JOINED</h3>
+            <p><span class="mono">AtivoEspacial</span> estende a superclasse abstrata <span class="mono">EquipamentoOrbital</span>, que centraliza id, proprietário e número de série.</p>
+            <div class="why"><b>Por quê:</b> a estratégia <b>JOINED</b> gera uma tabela por classe, normalizando os dados sem repetir colunas comuns.</div>
+          </div>
+          <div class="card reveal" style="--i:3">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></div>
+            <h3>Embedded</h3>
+            <p><span class="mono">CoordenadasEspaciais</span> (latitude, longitude, altitude) é um <span class="mono">@Embeddable</span> embarcado dentro de <span class="mono">AtivoEspacial</span>.</p>
+            <div class="why"><b>Por quê:</b> agrupa campos que andam juntos como um <b>componente reutilizável</b>, sem criar outra tabela.</div>
+          </div>
+          <div class="card warm reveal" style="--i:4">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#e8a85c" stroke-width="1.6"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="M10.5 10.5l3 3"/></svg></div>
+            <h3>Chave composta</h3>
+            <p><span class="mono">AlocacaoAtivoMissao</span> usa <span class="mono">@EmbeddedId</span> (ativoId + missaoId) e <span class="mono">@MapsId</span> para derivar a chave das FKs.</p>
+            <div class="why"><b>Por quê:</b> representa o relacionamento <b>N:N</b> ativo ↔ missão garantindo uma alocação única por par.</div>
+          </div>
+          <div class="card reveal" style="--i:5">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 11l8-4M8 13l8 4"/></svg></div>
+            <h3>Relacionamentos</h3>
+            <p>Um ativo tem muitas <span class="mono">manutenções</span>, <span class="mono">telemetrias</span> e <span class="mono">alertas</span> (1:N), e participa de várias missões (N:N).</p>
+            <div class="why"><b>Por quê:</b> modela o mundo real — múltiplas tabelas com integridade referencial via <b>@ManyToOne / @JoinColumn</b>.</div>
+          </div>
+        </div>
+        <p class="lead flow-note reveal" style="--i:6">No total, <span class="mono">10 entidades</span> compõem o domínio, incluindo <span class="mono">Usuario</span>, que implementa <span class="mono">UserDetails</span> para integrar com o Spring Security.</p>
+      </div>
+    </section>
+
+    <!-- 5 · PERSISTÊNCIA -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 05 — Persistência</div>
+        <h2 class="title reveal" style="--i:1">Spring Data JPA & o <span class="accent">N+1</span>.</h2>
+        <div class="grid g2">
+          <div class="reveal" style="--i:2">
+            <ul class="checklist" style="margin-top:0">
+              <li><span class="tick">·</span><span><b>JpaRepository&lt;T, ID&gt;.</b> Herdar a interface já entrega salvar, buscar, listar e remover — sem implementar nada.</span></li>
+              <li><span class="tick">·</span><span><b>@Query (JPQL).</b> Consultas customizadas escritas em cima das entidades, não das tabelas.</span></li>
+              <li><span class="tick">·</span><span><b>join fetch.</b> Traz o ativo junto do alerta na mesma consulta — resolve o problema <b>N+1</b> e a <span class="mono">LazyInitializationException</span>.</span></li>
+              <li><span class="tick">·</span><span><b>@Modifying.</b> Usado para o update em massa que descomissiona um ativo.</span></li>
+            </ul>
+            <p class="lead" style="margin-top:18px;font-size:.92rem">Sem <span class="mono">join fetch</span>, listar N alertas dispararia N consultas extras para carregar cada ativo. Uma única consulta resolve tudo.</p>
+          </div>
+          <div class="reveal" style="--i:3">
+            <div class="console">
+              <div class="bar"><span class="led r"></span><span class="led y"></span><span class="led g"></span><span style="margin-left:6px">AlertaOrbitalRepository.java</span></div>
+<pre><span class="cmt">// CRUD pronto, sem implementação</span>
+<span class="key">interface</span> AlertaOrbitalRepository
+    <span class="key">extends</span> JpaRepository&lt;AlertaOrbital, Long&gt; {
+
+  <span class="cmt">// traz o ativo na MESMA consulta</span>
+  <span class="str">@Query</span>(<span class="str">"select a from AlertaOrbital a "</span> +
+         <span class="str">"join fetch a.ativoEspacial "</span> +
+         <span class="str">"where a.id = :id"</span>)
+  Optional&lt;AlertaOrbital&gt; buscarComAtivoPorId(Long id);
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · SEGURANÇA -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 06 — Segurança</div>
+        <h2 class="title reveal" style="--i:1">Spring Security + <span class="accent">JWT</span>, stateless.</h2>
+        <div class="steps">
+          <div class="step reveal" style="--i:2"><span class="num">1</span><span class="stxt"><b>Login.</b> O cliente envia login e senha em <span class="mono">POST /api/auth/login</span>.</span></div>
+          <div class="step reveal" style="--i:3"><span class="num">2</span><span class="stxt"><b>Autenticação.</b> O <span class="mono">AuthenticationManager</span> valida via <span class="mono">DaoAuthenticationProvider</span> + <span class="mono">AutenticacaoService</span>.</span></div>
+          <div class="step reveal" style="--i:4"><span class="num">3</span><span class="stxt"><b>Hash.</b> A senha é comparada com o hash <span class="mono">BCrypt</span> — nunca armazenamos a senha em texto.</span></div>
+          <div class="step reveal" style="--i:5"><span class="num">4</span><span class="stxt"><b>Token.</b> O <span class="mono">TokenService</span> gera um <span class="mono">JWT</span> assinado em HMAC256, válido por 2 horas.</span></div>
+          <div class="step reveal" style="--i:6"><span class="num">5</span><span class="stxt"><b>Header.</b> Nas próximas chamadas o cliente envia <span class="mono">Authorization: Bearer &lt;token&gt;</span>.</span></div>
+          <div class="step reveal" style="--i:7"><span class="num">6</span><span class="stxt"><b>Filtro.</b> O <span class="mono">SecurityFilter</span> (OncePerRequestFilter) valida o token e popula o <span class="mono">SecurityContext</span>.</span></div>
+        </div>
+        <p class="lead flow-note reveal" style="--i:8">Rotas públicas: <span class="mono">/api/auth/login</span> e o Swagger. Todo o resto exige token. Sessão <span class="mono">STATELESS</span> e CSRF desabilitado — padrão para APIs REST.</p>
+      </div>
+    </section>
+
+    <!-- 7 · ENDPOINTS -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 07 — A API REST</div>
+        <h2 class="title reveal" style="--i:1">Endpoints, verbos & <span class="accent">status</span>.</h2>
+        <div class="grid g2">
+          <div class="reveal" style="--i:2">
+            <div class="rows" id="apiRows">
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb post">POST</span><span class="rpath">/api/auth/<b>login</b></span><span class="chev">›</span></div><div class="row-desc">Autentica e devolve o token JWT. <b>200 OK</b>.</div></div>
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb post">POST</span><span class="rpath">/api/<b>ativos</b></span><span class="chev">›</span></div><div class="row-desc">Cadastra um ativo e devolve o recurso com links <b>HATEOAS</b>. <b>201 Created</b>.</div></div>
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb get">GET</span><span class="rpath">/api/ativos/<b>{id}</b></span><span class="chev">›</span></div><div class="row-desc">Busca um ativo por ID, já com o link <span class="mono">self</span>. <b>200 OK</b> ou <b>404</b>.</div></div>
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb post">POST</span><span class="rpath">/api/<b>alertas</b></span><span class="chev">›</span></div><div class="row-desc">Cria um alerta vinculado a um ativo. <b>201 Created</b>.</div></div>
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb get">GET</span><span class="rpath">/api/alertas/ativo/<b>{ativoId}</b></span><span class="chev">›</span></div><div class="row-desc">Lista todos os alertas de um ativo específico. <b>200 OK</b>.</div></div>
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb put">PUT</span><span class="rpath">/api/alertas/<b>{id}</b></span><span class="chev">›</span></div><div class="row-desc">Atualiza um alerta existente. <b>200 OK</b>.</div></div>
+              <div class="row" onclick="this.classList.toggle('open')"><div class="row-head"><span class="verb del">DELETE</span><span class="rpath">/api/alertas/<b>{id}</b></span><span class="chev">›</span></div><div class="row-desc">Remove um alerta. <b>204 No Content</b>.</div></div>
+            </div>
+            <p class="lead" style="margin-top:14px;font-size:.86rem">Manutenções e telemetrias seguem o <b>mesmo padrão CRUD</b> completo.</p>
+          </div>
+          <div class="reveal" style="--i:3">
+            <div class="console">
+              <div class="bar"><span class="led r"></span><span class="led y"></span><span class="led g"></span><span style="margin-left:6px">HTTP · request/response</span><span class="stream">LIVE</span></div>
+<pre><span class="cmt"># requisição</span>
+<span class="key" id="cMethod">POST</span> <span class="str" id="cPath">/api/auth/login</span>
+<span class="cmt">Authorization:</span> Bearer <span class="str">eyJhbGci…</span>
+
+<span class="cmt"># resposta</span>
+HTTP <span class="num" id="cStatus">200 OK</span>
+<span id="cBody">{ "token": "eyJhbGciOiJIUzI1Ni…" }</span></pre>
+            </div>
+            <div class="code-grid" style="margin-top:14px">
+              <div class="code-cell"><div class="c g">201</div><div class="d">POST · Created</div></div>
+              <div class="code-cell"><div class="c b">200</div><div class="d">GET / PUT · OK</div></div>
+              <div class="code-cell"><div class="c b">204</div><div class="d">DELETE · No Content</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · TRATAMENTO DE ERROS -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 08 — Tratamento de erros</div>
+        <h2 class="title reveal" style="--i:1">Toda falha vira <span class="accent">JSON padronizado</span>.</h2>
+        <div class="grid g2">
+          <div class="reveal" style="--i:2">
+            <p class="lead" style="margin-bottom:18px">Um único <span class="mono">@RestControllerAdvice</span> — o <span class="mono">GlobalExceptionHandler</span> — captura as exceções e devolve sempre o mesmo formato, com o <span class="mono">HttpStatus</span> certo.</p>
+            <div class="code-grid">
+              <div class="code-cell"><div class="c r">404</div><div class="d">Não encontrado</div></div>
+              <div class="code-cell"><div class="c y">422</div><div class="d">Regra de negócio</div></div>
+              <div class="code-cell"><div class="c y">400</div><div class="d">Campos inválidos</div></div>
+              <div class="code-cell"><div class="c r">500</div><div class="d">Erro inesperado</div></div>
+            </div>
+            <ul class="checklist" style="margin-top:20px;gap:9px">
+              <li style="font-size:.9rem"><span class="tick" style="width:18px;height:18px;font-size:10px">·</span><span><span class="mono">EntidadeNaoLocalizadaException</span> → 404</span></li>
+              <li style="font-size:.9rem"><span class="tick" style="width:18px;height:18px;font-size:10px">·</span><span><span class="mono">RegraDeNegocioException</span> → 422</span></li>
+              <li style="font-size:.9rem"><span class="tick" style="width:18px;height:18px;font-size:10px">·</span><span><span class="mono">MethodArgumentNotValidException</span> → 400</span></li>
+            </ul>
+          </div>
+          <div class="reveal" style="--i:3">
+            <div class="console">
+              <div class="bar"><span class="led r"></span><span class="led y"></span><span class="led g"></span><span style="margin-left:6px">ErroApiResponse · 404</span></div>
+<pre>{
+  <span class="key">"timestamp"</span>: <span class="str">"2026-05-30T15:49:33"</span>,
+  <span class="key">"status"</span>: <span class="bool">404</span>,
+  <span class="key">"error"</span>: <span class="str">"Not Found"</span>,
+  <span class="key">"message"</span>: <span class="str">"Ativo espacial não
+            encontrado com id 99"</span>,
+  <span class="key">"path"</span>: <span class="str">"/api/ativos/99"</span>,
+  <span class="key">"details"</span>: [ <span class="str">"…"</span> ]
+}</pre>
+            </div>
+            <p class="lead" style="margin-top:14px;font-size:.86rem">O cliente sempre sabe <b>o que</b> falhou, <b>onde</b> e <b>por quê</b>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 · PROCEDIMENTO DE TESTE -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow reveal" style="--i:0">Missão · 09 — Procedimento de teste</div>
+        <h2 class="title reveal" style="--i:1">Como <span class="accent">validamos</span> a solução.</h2>
+        <div class="grid g3">
+          <div class="card reveal" style="--i:2">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+            <h3>Swagger UI</h3>
+            <p>Login → botão <b>Authorize</b> → colar o token → testar cada endpoint direto pelo navegador.</p>
+            <div class="why"><b>Valida:</b> contrato, validações e status codes de forma interativa.</div>
+          </div>
+          <div class="card reveal" style="--i:3">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><path d="M4 7l5 5-5 5M12 17h8"/></svg></div>
+            <h3>cURL & Postman</h3>
+            <p>Fluxo ponta a ponta: obter token → cadastrar ativo → criar alerta → buscar por ID.</p>
+            <div class="why"><b>Valida:</b> autenticação, CRUD e o caminho feliz completo.</div>
+          </div>
+          <div class="card reveal" style="--i:4">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/></svg></div>
+            <h3>Console H2</h3>
+            <p>Inspeção direta das tabelas em <span class="mono">/h2-console</span> para conferir o que foi persistido.</p>
+            <div class="why"><b>Valida:</b> mapeamento JPA, herança e chaves compostas no banco.</div>
+          </div>
+          <div class="card warm reveal" style="--i:5">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#e8a85c" stroke-width="1.6"><path d="M12 2l3 6 6 .5-4.5 4 1.5 6L12 15l-6 3.5 1.5-6L3 8.5 9 8z"/></svg></div>
+            <h3>Casos de erro</h3>
+            <p>Buscar id inexistente (404), enviar campos inválidos (400) e token ausente (401/403).</p>
+            <div class="why"><b>Valida:</b> o <b>GlobalExceptionHandler</b> e as regras de segurança.</div>
+          </div>
+          <div class="card reveal" style="--i:6">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l2.5 2.5L16 9"/></svg></div>
+            <h3>Spring Boot Test</h3>
+            <p>O teste <span class="mono">contextLoads()</span> garante que o contexto da aplicação sobe sem erros.</p>
+            <div class="why"><b>Valida:</b> beans, injeção de dependência e configuração.</div>
+          </div>
+          <div class="card reveal" style="--i:7">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+            <h3>Deploy no Render</h3>
+            <p>A mesma API rodando em produção (Docker), testável pelo Swagger público.</p>
+            <div class="why"><b>Valida:</b> o build, o container e o comportamento real em nuvem.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 · RECURSOS DE IA -->
+    <section class="slide">
+      <div class="inner">
+        <div class="eyebrow warm reveal" style="--i:0">Missão · 10 — Recursos de IA</div>
+        <h2 class="title reveal" style="--i:1">IA para <span class="accent warm">resolver dúvidas e erros</span>.</h2>
+        <p class="lead reveal" style="--i:2">Usamos IA como ferramenta de apoio ao longo do desenvolvimento — sempre entendendo, revisando e validando cada sugestão antes de aplicar ao código.</p>
+        <div class="grid g2">
+          <div class="card reveal" style="--i:3">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><path d="M12 2a7 7 0 0 0-4 12.7V18h8v-3.3A7 7 0 0 0 12 2zM9 21h6"/></svg></div>
+            <h3>Depuração de erros</h3>
+            <p>Diagnóstico de problemas reais: acesso a Record (<span class="mono">response.id()</span> vs getId()), <span class="mono">@MapsId</span> na chave composta e <span class="mono">LazyInitializationException</span> / N+1.</p>
+          </div>
+          <div class="card reveal" style="--i:4">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><path d="M12 3v18M5 8h14M5 16h14"/></svg></div>
+            <h3>Explicação de conceitos</h3>
+            <p>Entender a fundo HATEOAS, o fluxo do JWT, <span class="mono">join fetch</span> em JPQL e a estratégia de herança JOINED.</p>
+          </div>
+          <div class="card warm reveal" style="--i:5">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#e8a85c" stroke-width="1.6"><path d="M4 4h16v4H4zM4 12h10v8H4zM18 12h2v8h-2z"/></svg></div>
+            <h3>Documentação</h3>
+            <p>Apoio na escrita do README, das anotações OpenAPI e na padronização do JSON de erro.</p>
+          </div>
+          <div class="card reveal" style="--i:6">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#58c7e0" stroke-width="1.6"><path d="M16 3l5 5-9 9-5 1 1-5zM4 20h16"/></svg></div>
+            <h3>Refatoração & boas práticas</h3>
+            <p>Migração de um DAO antigo para <span class="mono">Spring Data JPA</span> e revisão de camadas, DTOs e tratamento de exceções.</p>
+          </div>
+        </div>
+        <p class="lead flow-note reveal" style="--i:7">A IA <b>acelerou o aprendizado e a depuração</b> — mas a arquitetura, as decisões e o entendimento do código são da equipe.</p>
+      </div>
+    </section>
+
+    <!-- 11 · EQUIPE -->
+    <section class="slide hero">
+      <div class="inner">
+        <div class="eyebrow center reveal" style="--i:0">Tripulação · FIAP 2TDS</div>
+        <h2 class="title reveal" style="--i:1">Equipe.</h2>
+        <div class="crew">
+          <div class="member reveal" style="--i:2">
+            <div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>
+            <h4>Emanuel Italo Leal<br>Trindade Soares</h4><div class="rm">RM 561337</div>
+          </div>
+          <div class="member reveal" style="--i:3">
+            <div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>
+            <h4>Paulo Henrique<br>Alves Estalise</h4><div class="rm">RM 563811</div>
+          </div>
+          <div class="member reveal" style="--i:4">
+            <div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></div>
+            <h4>Gabriel Bebe</h4><div class="rm">RM 562012</div>
+          </div>
+        </div>
+        <div class="links reveal" style="--i:5">
+          <a class="linkbtn" href="https://github.com/Emanuel-italo/Global-Solution---Java" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5A10.5 10.5 0 0 0 8.7 22c.5.1.7-.2.7-.5v-1.8c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.8-4.7 5.1.4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10.5 10.5 0 0 0 12 1.5z"/></svg>
+            GitHub
+          </a>
+          <a class="linkbtn" href="https://global-solution-java-2.onrender.com/swagger-ui/index.html" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+            Swagger
+          </a>
+          <a class="linkbtn" href="https://global-solution-java-2.onrender.com" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+            API (Render)
+          </a>
+          <a class="linkbtn" href="https://www.loom.com/share/cd542939c8f84f918686aa1f0e10684e" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z" fill="currentColor"/></svg>
+            Vídeo demo
+          </a>
+        </div>
+        <p class="closing reveal" style="--i:6">API <b>online & operante</b> — obrigado pela atenção.</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="hint" id="hint">← / →  ·  espaço para avançar</div>
+
+<div class="botbar">
+  <div class="slide-id"><b id="slideNum">01</b> / 12 — <span id="slideName">INÍCIO</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="nav-btns">
+    <button class="nbtn" id="prev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="nbtn" id="next" aria-label="Próximo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+</div>
+<div class="progress" id="progress"></div>
+
+<!-- =================== LAUNCH OVERLAY =================== -->
+<div id="launch" aria-label="Sequência de lançamento">
+  <div class="lx-flash" id="flash"></div>
+  <div class="lx-ui">
+    <div class="lx-eyebrow">OrbitLink · Centro de Lançamento</div>
+    <div class="boot" id="boot">
+      <div class="head"><span class="d" id="bd"></span>INICIALIZANDO SPRING BOOT<span class="pct" id="bootPct">0%</span></div>
+      <div class="log" id="bootLog"></div>
+      <div class="track2"><i id="bootBar"></i></div>
+    </div>
+    <div class="ready" id="ready">
+      <h2>Pronto para <b>decolar?</b></h2>
+      <p>Contexto carregado · aguardando ignição</p>
+      <button class="launch-btn" id="launchBtn">▲ Iniciar apresentação</button>
+    </div>
+  </div>
+
+  <div class="count" id="count"><span class="n" id="countN">5</span></div>
+
+  <div class="pad-scene" id="padScene">
+    <div class="gantry">
+      <svg viewBox="0 0 46 200" aria-hidden="true">
+        <line x1="8" y1="6" x2="8" y2="194" stroke="#33485a" stroke-width="3"/>
+        <line x1="40" y1="6" x2="40" y2="194" stroke="#33485a" stroke-width="3"/>
+        <path d="M8 24 L40 40 M40 24 L8 40 M8 64 L40 80 M40 64 L8 80 M8 104 L40 120 M40 104 L8 120 M8 144 L40 160 M40 144 L8 160" stroke="#2a3c4c" stroke-width="2"/>
+        <rect x="0" y="60" width="14" height="6" rx="2" fill="#3a5060"/>
+        <rect x="0" y="120" width="14" height="6" rx="2" fill="#3a5060"/>
+        <circle class="lite" cx="44" cy="14" r="3" fill="#ff5e6c"/>
+        <circle class="lite b" cx="44" cy="100" r="3" fill="#ff5e6c"/>
+      </svg>
+    </div>
+    <div class="pad"></div>
+    <div class="vent"><i></i><i></i><i></i></div>
+    <div class="smoke" id="smoke">
+      <span class="puff" style="left:6%;width:60px;height:60px;--tx:-50px;--ty:-10px;--d:2.6s"></span>
+      <span class="puff" style="left:24%;width:80px;height:80px;--tx:-26px;--ty:-26px;--d:2.9s"></span>
+      <span class="puff" style="left:42%;width:96px;height:96px;--tx:0px;--ty:-34px;--d:3.1s"></span>
+      <span class="puff" style="left:60%;width:80px;height:80px;--tx:30px;--ty:-24px;--d:2.8s"></span>
+      <span class="puff" style="left:78%;width:62px;height:62px;--tx:56px;--ty:-12px;--d:2.5s"></span>
+      <span class="puff" style="left:36%;width:70px;height:70px;--tx:-10px;--ty:-44px;--d:3.3s"></span>
+    </div>
+    <div class="rocket idle" id="rocket">
+      <svg viewBox="0 0 120 360" aria-hidden="true">
+        <defs>
+          <linearGradient id="rkBody" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8aa0ad"/><stop offset="28%" stop-color="#eef4f7"/>
+            <stop offset="62%" stop-color="#cdd9e0"/><stop offset="100%" stop-color="#7f95a3"/>
+          </linearGradient>
+          <linearGradient id="rkNose" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#b9763a"/><stop offset="50%" stop-color="#f0b878"/><stop offset="100%" stop-color="#b9763a"/>
+          </linearGradient>
+          <radialGradient id="rkWin" cx="40%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#bff0fb"/><stop offset="60%" stop-color="#58c7e0"/><stop offset="100%" stop-color="#1c5f72"/>
+          </radialGradient>
+          <linearGradient id="flmOuter" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffd27a"/><stop offset="45%" stop-color="#ff9a3c"/><stop offset="100%" stop-color="#ff5e3c" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g class="flame" id="flame">
+          <path d="M48 290 Q60 410 72 290 Q60 332 48 290Z" fill="url(#flmOuter)"/>
+          <path d="M52 290 Q60 372 68 290 Q60 320 52 290Z" fill="#ffd98a"/>
+          <path d="M55 290 Q60 344 65 290 Q60 312 55 290Z" fill="#fff7e0"/>
+        </g>
+        <path d="M34 250 L18 300 L40 290 Z" fill="#b9763a"/>
+        <path d="M86 250 L102 300 L80 290 Z" fill="#b9763a"/>
+        <path d="M40 70 Q60 18 80 70 L80 292 Q60 304 40 292 Z" fill="url(#rkBody)" stroke="#5d7280" stroke-width="1"/>
+        <path d="M40 72 Q60 14 80 72 Z" fill="url(#rkNose)"/>
+        <line x1="40" y1="150" x2="80" y2="150" stroke="#8ea3b0" stroke-opacity=".7"/>
+        <line x1="40" y1="232" x2="80" y2="232" stroke="#8ea3b0" stroke-opacity=".7"/>
+        <line x1="60" y1="78" x2="60" y2="292" stroke="#9fb2bd" stroke-opacity=".35"/>
+        <circle cx="60" cy="116" r="15" fill="url(#rkWin)" stroke="#5d7280" stroke-width="2"/>
+        <circle cx="55" cy="111" r="4" fill="#ffffff" opacity=".7"/>
+        <path d="M46 292 L74 292 L68 312 L52 312 Z" fill="#5d7280"/>
+      </svg>
+    </div>
+  </div>
+  <button class="lx-skip" id="skipBtn">Pular ›</button>
+</div>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- SLIDES ---------- */
+  const slides = [...document.querySelectorAll('.slide')];
+  const track = document.getElementById('track');
+  const stage = document.getElementById('stage');
+  const names = ['INÍCIO','A SOLUÇÃO','ARQUITETURA','SPRING','DOMÍNIO','PERSISTÊNCIA','SEGURANÇA','ENDPOINTS','ERROS','TESTES','IA','EQUIPE'];
+  const total = slides.length;
+  let cur = 0, locked = false, started = false;
+
+  const dotsEl = document.getElementById('dots');
+  slides.forEach((_,i)=>{
+    const b=document.createElement('button');
+    b.className='dot-nav'+(i===0?' on':'');
+    b.setAttribute('aria-label','Ir para slide '+(i+1));
+    b.onclick=()=>go(i);
+    dotsEl.appendChild(b);
+  });
+  const dots=[...dotsEl.children];
+  const sweep=document.getElementById('sweep');
+
+  function render(){
+    track.style.transform=`translateX(-${cur*100}%)`;
+    slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
+    dots.forEach((d,i)=>d.classList.toggle('on',i===cur));
+    document.getElementById('slideNum').textContent=String(cur+1).padStart(2,'0');
+    document.getElementById('slideName').textContent=names[cur];
+    document.getElementById('progress').style.width=((cur)/(total-1)*100)+'%';
+    document.getElementById('prev').disabled=cur===0;
+    document.getElementById('next').disabled=cur===total-1;
+    document.getElementById('hint').style.opacity=cur===0?'':'0';
+    if(!reduce && started){ sweep.classList.remove('go'); void sweep.offsetWidth; sweep.classList.add('go'); }
+  }
+  function go(i){
+    if(!started) return;
+    i=Math.max(0,Math.min(total-1,i));
+    if(i===cur||locked) return;
+    locked=true; cur=i; render();
+    setTimeout(()=>locked=false,500);
+  }
+  const move=d=>go(cur+d);
+
+  document.getElementById('prev').onclick=()=>move(-1);
+  document.getElementById('next').onclick=()=>move(1);
+  addEventListener('keydown',e=>{
+    if(!started) return;
+    if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();move(1);}
+    else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();move(-1);}
+    else if(e.key==='Home')go(0);
+    else if(e.key==='End')go(total-1);
+  });
+  let tx=0;
+  addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener('touchend',e=>{
+    if(!started) return;
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>55) move(dx<0?1:-1);
+  },{passive:true});
+
+  render();
+
+  /* ---------- HUD / UPTIME / SIGNAL ---------- */
+  let t0=null;
+  function tickUptime(){
+    if(!t0) return;
+    const s=Math.floor((Date.now()-t0)/1000);
+    document.getElementById('uptime').textContent=String(s).padStart(3,'0')+'s';
+  }
+  setInterval(tickUptime,1000);
+  const sig=document.getElementById('sigLast');
+  setInterval(()=>{ sig.classList.toggle('on', Math.random()>.25); },1400);
+
+  /* ---------- LIVE API CONSOLE (request/response cycler) ---------- */
+  const cMethod=document.getElementById('cMethod');
+  const cPath=document.getElementById('cPath');
+  const cStatus=document.getElementById('cStatus');
+  const cBody=document.getElementById('cBody');
+  const liveLat=document.getElementById('liveLat');
+  const reqCount=document.getElementById('reqCount');
+  const verbColor={GET:'var(--signal)',POST:'var(--ok)',PUT:'var(--harvest)',DELETE:'var(--crit)'};
+  const calls=[
+    {m:'POST',p:'/api/auth/login',s:'200 OK',c:'var(--ok)',b:'{ "token": "eyJhbGciOiJIUzI1Ni…" }'},
+    {m:'POST',p:'/api/ativos',s:'201 Created',c:'var(--ok)',b:'{ "id": 1, "nome": "Aurora-2", "tipoAtivo": "SATELITE", "_links": { … } }'},
+    {m:'GET',p:'/api/ativos/1',s:'200 OK',c:'var(--ok)',b:'{ "id": 1, "agenciaResponsavel": "OrbitLink", "_links": { "self": … } }'},
+    {m:'POST',p:'/api/alertas',s:'201 Created',c:'var(--ok)',b:'{ "id": 7, "tipoAlerta": "RISCO_COLISAO", "criticidade": "ALTA" }'},
+    {m:'GET',p:'/api/ativos/99',s:'404 Not Found',c:'var(--crit)',b:'{ "error": "Not Found", "message": "Ativo… id 99" }'}
+  ];
+  let ci=0;
+  function apiTick(){
+    const k=calls[ci%calls.length]; ci++;
+    if(cMethod){ cMethod.textContent=k.m; cMethod.style.color=verbColor[k.m]||'var(--signal)'; }
+    if(cPath) cPath.textContent=k.p;
+    if(cStatus){ cStatus.textContent=k.s; cStatus.style.color=k.c; }
+    if(cBody) cBody.textContent=k.b;
+    const lat=Math.round(40+Math.random()*120);
+    if(liveLat) liveLat.textContent=lat+'ms';
+    if(reqCount) reqCount.textContent=String(ci).padStart(4,'0');
+  }
+  setInterval(apiTick,2200);
+
+  /* ---------- CARD POINTER GLOW ---------- */
+  document.querySelectorAll('.card').forEach(c=>{
+    c.addEventListener('pointermove',e=>{
+      const r=c.getBoundingClientRect();
+      c.style.setProperty('--gx',(e.clientX-r.left)+'px');
+      c.style.setProperty('--gy',(e.clientY-r.top)+'px');
+    });
+  });
+
+  /* ---------- CITY LIGHTS ---------- */
+  (function(){
+    const g=document.getElementById('cityLights'); if(!g) return;
+    const ns='http://www.w3.org/2000/svg';
+    for(let i=0;i<46;i++){
+      const cx=40+Math.random()*620, cy=240+Math.random()*230;
+      const c=document.createElementNS(ns,'circle');
+      c.setAttribute('cx',cx); c.setAttribute('cy',cy);
+      c.setAttribute('r',(Math.random()*1.1+.5).toFixed(2));
+      c.setAttribute('opacity',(Math.random()*.5+.25).toFixed(2));
+      const a=document.createElementNS(ns,'animate');
+      a.setAttribute('attributeName','opacity');
+      a.setAttribute('values','.2;.8;.2');
+      a.setAttribute('dur',(2+Math.random()*3).toFixed(1)+'s');
+      a.setAttribute('repeatCount','indefinite');
+      a.setAttribute('begin',(Math.random()*3).toFixed(1)+'s');
+      c.appendChild(a); g.appendChild(c);
+    }
+  })();
+
+  /* ---------- STARFIELD (parallax) ---------- */
+  const cv=document.getElementById('space'), ctx=cv.getContext('2d');
+  let W,H,layers=[],shoot=null,sats=[];
+  let mx=0,my=0,tmx=0,tmy=0;
+  const DEPTH=[{n:.45,r:[.2,.7],s:.04,a:.5},{n:.35,r:[.5,1.1],s:.09,a:.75},{n:.2,r:[.9,1.7],s:.16,a:1}];
+
+  function build(){
+    W=cv.width=innerWidth; H=cv.height=innerHeight;
+    layers=DEPTH.map(d=>{
+      const count=Math.min(Math.floor(W*H/14000*d.n*3),220);
+      return {d, stars:Array.from({length:count},()=>({
+        x:Math.random()*W, y:Math.random()*H,
+        r:d.r[0]+Math.random()*(d.r[1]-d.r[0]),
+        tw:Math.random()*Math.PI*2,
+        hue: Math.random()<.12 ? 'h' : (Math.random()<.1?'w':'n')
+      }))};
+    });
+    sats=[{x:-60,y:H*.22,sp:.5,len:0},{x:W+60,y:H*.34,sp:-.32,len:0}];
+  }
+  addEventListener('resize',build); build();
+
+  addEventListener('pointermove',e=>{
+    tmx=(e.clientX/innerWidth-.5);
+    tmy=(e.clientY/innerHeight-.5);
+  });
+
+  const earthWrap=document.getElementById('earthWrap');
+  const aurora=document.getElementById('aurora');
+  const nebula=document.getElementById('nebula');
+
+  function colorFor(hue,a){
+    if(hue==='h') return `rgba(120,200,255,${a})`;
+    if(hue==='w') return `rgba(255,240,210,${a})`;
+    return `rgba(190,222,236,${a})`;
+  }
+
+  function draw(){
+    mx += (tmx-mx)*0.05; my += (tmy-my)*0.05;
+    earthWrap.style.transform=`translate(${mx*-16}px, ${my*-7}px)`;
+    aurora.style.transform=`translate(${mx*-26}px, 0)`;
+    nebula.style.transform=`translate(${mx*-34}px, ${my*-20}px)`;
+
+    ctx.clearRect(0,0,W,H);
+    for(const L of layers){
+      const ox=mx*40*L.d.s/0.16, oy=my*22*L.d.s/0.16;
+      for(const s of L.stars){
+        s.tw+=.02; s.x-=L.d.s; if(s.x<-2)s.x=W+2;
+        const tw=.55+Math.sin(s.tw)*.45;
+        const a=L.d.a*tw;
+        ctx.beginPath();
+        ctx.arc(s.x+ox, s.y+oy, s.r, 0, 7);
+        ctx.fillStyle=colorFor(s.hue,a);
+        ctx.fill();
+      }
+    }
+    for(const st of sats){
+      st.x+=st.sp; st.len=Math.min(60,st.len+1);
+      if(st.sp>0 && st.x>W+80){st.x=-80;st.len=0;}
+      if(st.sp<0 && st.x<-80){st.x=W+80;st.len=0;}
+      const dir=st.sp>0?-1:1;
+      const g=ctx.createLinearGradient(st.x,st.y,st.x+dir*st.len,st.y);
+      g.addColorStop(0,'rgba(88,199,224,.5)'); g.addColorStop(1,'rgba(88,199,224,0)');
+      ctx.strokeStyle=g; ctx.lineWidth=1; ctx.beginPath();
+      ctx.moveTo(st.x,st.y); ctx.lineTo(st.x+dir*st.len,st.y); ctx.stroke();
+      ctx.fillStyle='rgba(180,230,245,.9)'; ctx.fillRect(st.x-1,st.y-1,2.4,2.4);
+    }
+    if(!shoot && Math.random()<.0045){ shoot={x:Math.random()*W,y:Math.random()*H*.45,len:0,max:Math.random()*130+90}; }
+    if(shoot){
+      ctx.beginPath(); ctx.moveTo(shoot.x,shoot.y);
+      ctx.lineTo(shoot.x-shoot.len*.9,shoot.y-shoot.len*.42);
+      const g=ctx.createLinearGradient(shoot.x,shoot.y,shoot.x-shoot.len,shoot.y-shoot.len*.45);
+      g.addColorStop(0,'rgba(190,238,251,.9)'); g.addColorStop(1,'rgba(88,199,224,0)');
+      ctx.strokeStyle=g; ctx.lineWidth=1.6; ctx.stroke();
+      shoot.x+=5; shoot.y+=2.3; shoot.len=Math.min(shoot.max,shoot.len+9);
+      if(shoot.x>W+60||shoot.y>H+60) shoot=null;
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  let raf;
+  if(!reduce){ draw(); }
+  else {
+    for(const L of layers) for(const s of L.stars){
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7);
+      ctx.fillStyle=colorFor(s.hue,L.d.a*.7); ctx.fill();
+    }
+  }
+
+  /* =================== LAUNCH SEQUENCE =================== */
+  const launch=document.getElementById('launch');
+  const boot=document.getElementById('boot');
+  const bootBar=document.getElementById('bootBar');
+  const bootPct=document.getElementById('bootPct');
+  const bootLog=document.getElementById('bootLog');
+  const bd=document.getElementById('bd');
+  const ready=document.getElementById('ready');
+  const launchBtn=document.getElementById('launchBtn');
+  const countWrap=document.getElementById('count');
+  const countN=document.getElementById('countN');
+  const rocket=document.getElementById('rocket');
+  const flame=document.getElementById('flame');
+  const smoke=document.getElementById('smoke');
+  const padScene=document.getElementById('padScene');
+  const flash=document.getElementById('flash');
+  const skipBtn=document.getElementById('skipBtn');
+
+  const logs=[
+    {t:'> iniciando contexto Spring', s:'OK'},
+    {t:'> conectando datasource H2 (orbitlinkdb)', s:'OK'},
+    {t:'> aplicando SecurityFilterChain (JWT)', s:'OK'},
+    {t:'> mapeando endpoints REST', s:'OK'},
+    {t:'> gerando documentação OpenAPI', s:'100%'}
+  ];
+  let logIdx=0;
+  function pushLog(){
+    if(logIdx>=logs.length) return;
+    const item=logs[logIdx++];
+    const div=document.createElement('div');
+    div.className='l';
+    div.innerHTML=`<span class="pp">${item.t}</span> <span class="dim">·····</span> <span class="ok">${item.s}</span>`;
+    bootLog.appendChild(div);
+    requestAnimationFrame(()=>div.classList.add('show'));
+  }
+
+  let booted=false;
+  function runBoot(){
+    const dur=reduce?300:2600;
+    const start=Date.now();
+    const iv=setInterval(()=>{
+      const e=Math.min(1,(Date.now()-start)/dur);
+      const p=Math.round(e*100);
+      bootBar.style.width=p+'%';
+      bootPct.textContent=p+'%';
+      if(p>=20*(logIdx+1) && logIdx<logs.length) pushLog();
+      if(e>=1){
+        clearInterval(iv);
+        while(logIdx<logs.length) pushLog();
+        bd.classList.add('on');
+        bootPct.textContent='PRONTO';
+        booted=true;
+        setTimeout(()=>{ boot.style.transition='opacity .5s, transform .5s'; boot.style.opacity='0'; boot.style.transform='translateY(-8px)';
+          setTimeout(()=>{ boot.style.display='none'; ready.classList.add('show'); }, 480); }, 420);
+      }
+    },40);
+  }
+  runBoot();
+
+  function beginPresentation(){
+    stage.classList.remove('preboot');
+    started=true;
+    t0=Date.now();
+    apiTick();
+    const hero=slides[0];
+    hero.classList.remove('active'); void hero.offsetWidth; hero.classList.add('active');
+    if(!reduce){ sweep.classList.remove('go'); void sweep.offsetWidth; sweep.classList.add('go'); }
+  }
+
+  function finishLaunch(){
+    launch.classList.add('done');
+    beginPresentation();
+    setTimeout(()=>{ launch.style.display='none'; }, 1100);
+  }
+
+  function doCountdown(){
+    launchBtn.disabled=true;
+    ready.classList.remove('show');
+    rocket.classList.remove('idle');
+    countWrap.classList.add('show');
+
+    if(reduce){
+      countN.textContent='DECOLAR';
+      setTimeout(finishLaunch, 500);
+      return;
+    }
+
+    const seq=[5,4,3,2,1];
+    let i=0;
+    const step=()=>{
+      countN.classList.remove('fire');
+      countN.textContent=seq[i];
+      countN.classList.remove('go'); void countN.offsetWidth; countN.classList.add('go');
+      if(seq[i]<=2){ flame.classList.add('on'); flame.style.transform='scaleY(.5)'; }
+      i++;
+      if(i<seq.length){ setTimeout(step,1000); }
+      else { setTimeout(ignite,1000); }
+    };
+    step();
+
+    function ignite(){
+      countN.classList.add('fire');
+      countN.classList.remove('go'); void countN.offsetWidth; countN.classList.add('go');
+      countN.textContent='DECOLAR!';
+      flame.classList.add('on');
+      flame.style.transform='scaleY(1)';
+      smoke.classList.add('go');
+      padScene.classList.add('shake');
+      flash.classList.add('go');
+      setTimeout(()=>{
+        rocket.classList.add('launch');
+        countWrap.classList.remove('show');
+      }, 520);
+      setTimeout(()=>{ padScene.classList.remove('shake'); }, 1700);
+      setTimeout(finishLaunch, 1500);
+    }
+  }
+
+  launchBtn.addEventListener('click',()=>{ if(booted) doCountdown(); });
+  skipBtn.addEventListener('click', finishLaunch);
+  addEventListener('keydown',e=>{
+    if(launch.classList.contains('done')) return;
+    if(e.key==='Escape') finishLaunch();
+    else if((e.key===' '||e.key==='Enter') && booted && !launchBtn.disabled){ e.preventDefault(); doCountdown(); }
+  });
+})();
+</script>
+</body>
+</html>
